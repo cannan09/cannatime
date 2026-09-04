@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canna Time 💕</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Trebuchet MS", Arial, sans-serif;
+            background: linear-gradient(135deg, #ffd6e7, #e8d9ff, #d8f3ff);
+            min-height: 100vh;
+            color: #4a3a4f;
+            padding: 25px 15px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 8px 25px rgba(100, 70, 120, 0.12);
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #d05a91;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1.05rem;
+            color: #765d78;
+        }
+
+        /* Main card */
+        .booking-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 0 15px 45px rgba(91, 61, 100, 0.15);
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #5c4764;
+        }
+
+        /* Hangout options */
+        .options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .option {
+            position: relative;
+        }
+
+        .option input {
+            display: none;
+        }
+
+        .option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 105px;
+            padding: 12px 5px;
+            background: #fff7fb;
+            border: 2px solid #f2d5e4;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.25s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .option label:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(208, 90, 145, 0.15);
+        }
+
+        .option input:checked + label {
+            background: #ffd8e9;
+            border-color: #d05a91;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(208, 90, 145, 0.2);
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 6px;
+        }
+
+        /* Calendar */
+        .calendar-wrapper {
+            background: #fff8fc;
+            border-radius: 22px;
+            padding: 20px;
+            border: 2px solid #f2d5e4;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header h3 {
+            color: #d05a91;
+        }
+
+        .month-button {
+            border: none;
+            background: #f5dff0;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #704d69;
+            transition: 0.2s;
+        }
+
+        .month-button:hover {
+            background: #eac6dd;
+            transform: scale(1.05);
+        }
+
+        .weekdays,
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #a27d9c;
+            padding: 8px 0;
+        }
+
+        .day {
+            border: none;
+            background: white;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #5a475d;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .day:hover:not(:disabled) {
+            background: #ffe4ef;
+            transform: scale(1.05);
+        }
+
+        .day.today {
+            border: 2px solid #d05a91;
+        }
+
+        .day.selected {
+            background: #d05a91;
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.booked {
+            background: #e6e0e5;
+            color: #aaa;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .day.past {
+            color: #c8c0c8;
+            cursor: not-allowed;
+            background: #faf8fa;
+        }
+
+        .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        /* Time */
+        .time-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #f0d5e4;
+            background: #fff9fc;
+            color: #59485c;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .time-input:focus {
+            border-color: #d05a91;
+        }
+
+        /* Selected date */
+        .selected-date {
+            margin-top: 12px;
+            text-align: center;
+            color: #9a668c;
+            font-size: 0.95rem;
+        }
+
+        /* Button */
+        .book-button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #d05a91, #a875c8);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 8px 20px rgba(208, 90, 145, 0.25);
+        }
+
+        .book-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(208, 90, 145, 0.3);
+        }
+
+        /* Confirmation */
+        .confirmation {
+            display: none;
+            text-align: center;
+            background: #fff4fa;
+            border: 2px solid #edc9dd;
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+
+        .confirmation.show {
+            display: block;
+            animation: popIn 0.4s ease;
+        }
+
+        .confirmation-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .confirmation h2 {
+            color: #d05a91;
+            margin-bottom: 15px;
+        }
+
+        .booking-details {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .phone {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #a05e9c;
+            margin-top: 10px;
+        }
+
+        .reset-button {
+            border: none;
+            background: #ead8f0;
+            color: #684c6c;
+            padding: 12px 22px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .reset-button:hover {
+            background: #dfc6e7;
+        }
+
+        .notice {
+            font-size: 0.85rem;
+            color: #977f96;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #806b82;
+            font-size: 0.9rem;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+            h1 {
+                font-size: 2.3rem;
+            }
+
+            .booking-card {
+                padding: 22px;
+            }
+
+            .options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .option:last-child {
+                grid-column: span 2;
+            }
+
+            .day {
+                height: 40px;
+                font-size: 0.85rem;
+            }
+
+            .weekday {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <div class="logo">
+            <h1>♡ Canna Time ♡</h1>
+            <p class="subtitle">Pick a day. Pick a vibe. Let's hang out ✨</p>
+        </div>
+    </header>
+
+    <div class="booking-card">
+
+        <!-- Hangout Selection -->
+        <div class="section">
+            <div class="section-title">What are we doing? 💕</div>
+
+            <div class="options">
+
+                <div class="option">
+                    <input type="radio" name="hangout" id="lunch" value="Lunch">
+                    <label for="lunch">
+                        <span class="emoji">🍝</span>
+                        Lunch
+                    </label>
+                </div>
+
+                <div class="option">
+                    <input type="radio" name="hangout" id="chilling" value="Chilling">
+                    <label for="chilling">
+                        <span class="emoji">🛋️</span>
+                        Chilling
+                    </label>
+                </div>
+
+                <div class="option">
+                    <input type="radio" name="hangout" id="activity" value="Activity">
+                    <label for="activity">
+                        <span class="emoji">🎨</span>
+                        Activity
+                    </label>
+                </div>
+
+                <div class="option">
+                    <input type="radio" name="hangout" id="fortnite" value="Fortnite">
+                    <label for="fortnite">
+                        <span class="emoji">🎮</span>
+                        Fortnite
+                    </label>
+                </div>
+
+                <div class="option">
+                    <input type="radio" name="hangout" id="facetime" value="FaceTime">
+                    <label for="facetime">
+                        <span class="emoji">📱</span>
+                        FaceTime
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="section">
+            <div class="section-title">Choose a day 📅</div>
+
+            <div class="calendar-wrapper">
+
+                <div class="calendar-header">
+                    <button class="month-button" id="prevMonth">‹</button>
+                    <h3 id="monthYear"></h3>
+                    <button class="month-button" id="nextMonth">›</button>
+                </div>
+
+                <div class="weekdays">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+
+                <div class="days" id="calendarDays"></div>
+
+                <p class="selected-date" id="selectedDate">
+                    No date selected yet ♡
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Time -->
+        <div class="section">
+            <div class="section-title">What time? ⏰</div>
+
+            <input
+                type="time"
+                id="time"
+                class="time-input"
+            >
+        </div>
+
+        <!-- Book -->
+        <button class="book-button" onclick="bookHangout()">
+            Book Our Time 💗
+        </button>
+
+        <p class="notice">
+            Once a date is booked, it will be unavailable for another booking.
+        </p>
+
+        <!-- Confirmation -->
+        <div class="confirmation" id="confirmation">
+
+            <div class="confirmation-icon">💗</div>
+
+            <h2>It's a date! ✨</h2>
+
+            <p>Your Canna Time has been booked!</p>
+
+            <div class="booking-details">
+                <strong id="confirmActivity"></strong><br>
+                📅 <span id="confirmDate"></span><br>
+                ⏰ <span id="confirmTime"></span>
+            </div>
+
+            <p>Need to reach me?</p>
+
+            <!-- CHANGE THIS PHONE NUMBER -->
+            <div class="phone">
+                📱 (YOUR PHONE NUMBER)
+            </div>
+
+            <br>
+
+            <button class="reset-button" onclick="resetBooking()">
+                Make Another Booking
+            </button>
+
+        </div>
+
+    </div>
+
+    <footer>
+        Made with ♡ for Canna Time
+    </footer>
+
+</div>
+
+
+<script>
+
+    // ============================
+    // SETTINGS
+    // ============================
+
+    let currentDate = new Date();
+    let selectedDate = null;
+
+    // Dates are saved in the browser
+    let bookedDates = JSON.parse(
+        localStorage.getItem("cannaBookedDates") || "[]"
+    );
+
+
+    // ============================
+    // CALENDAR
+    // ============================
+
+    function renderCalendar() {
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        const monthYear = document.getElementById("monthYear");
+        const calendarDays = document.getElementById("calendarDays");
+
+        const monthName = currentDate.toLocaleString("default", {
+            month: "long"
+        });
+
+        monthYear.textContent = `${monthName} ${year}`;
+
+        calendarDays.innerHTML = "";
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+        // Empty spaces before first day
+        for (let i = 0; i < firstDay; i++) {
+
+            const empty = document.createElement("div");
+
+            empty.className = "day empty";
+
+            calendarDays.appendChild(empty);
+        }
+
+        // Days
+        for (let day = 1; day <= daysInMonth; day++) {
+
+            const button = document.createElement("button");
+
+            button.className = "day";
+            button.textContent = day;
+
+            const dateObject = new Date(year, month, day);
+
+            const dateString = formatDate(dateObject);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Today
+            if (
+                dateObject.toDateString() === today.toDateString()
+            ) {
+                button.classList.add("today");
+            }
+
+            // Past dates
+            if (dateObject < today) {
+
+                button.classList.add("past");
+                button.disabled = true;
+
+            }
+
+            // Already booked
+            if (bookedDates.includes(dateString)) {
+
+                button.classList.add("booked");
+                button.disabled = true;
+
+            }
+
+            // Selected date
+            if (
+                selectedDate &&
+                formatDate(selectedDate) === dateString
+            ) {
+
+                button.classList.add("selected");
+
+            }
+
+            button.addEventListener("click", function () {
+
+                selectedDate = dateObject;
+
+                document.getElementById("selectedDate").textContent =
+                    `You picked ${dateObject.toLocaleDateString(
+                        "en-US",
+                        {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric"
+                        }
+                    )} ♡`;
+
+                renderCalendar();
+
+            });
+
+            calendarDays.appendChild(button);
+        }
+    }
+
+
+    function formatDate(date) {
+
+        const year = date.getFullYear();
+
+        const month = String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+        const day = String(
+            date.getDate()
+        ).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+
+    // ============================
+    // MONTH BUTTONS
+    // ============================
+
+    document.getElementById("prevMonth").addEventListener(
+        "click",
+        function () {
+
+            currentDate.setMonth(
+                currentDate.getMonth() - 1
+            );
+
+            renderCalendar();
+
+        }
+    );
+
+
+    document.getElementById("nextMonth").addEventListener(
+        "click",
+        function () {
+
+            currentDate.setMonth(
+                currentDate.getMonth() + 1
+            );
+
+            renderCalendar();
+
+        }
+    );
+
+
+    // ============================
+    // BOOKING
+    // ============================
+
+    function bookHangout() {
+
+        const activity = document.querySelector(
+            'input[name="hangout"]:checked'
+        );
+
+        const time = document.getElementById("time").value;
+
+        // Check activity
+        if (!activity) {
+
+            alert("Pick what you want to do first! 💕");
+
+            return;
+        }
+
+        // Check date
+        if (!selectedDate) {
+
+            alert("Pick a day on the calendar! 📅");
+
+            return;
+        }
+
+        // Check time
+        if (!time) {
+
+            alert("Pick a time! ⏰");
+
+            return;
+        }
+
+        const dateString = formatDate(selectedDate);
+
+        // Double check date isn't already booked
+        if (bookedDates.includes(dateString)) {
+
+            alert("Oops! That day is already booked. Pick another day 💗");
+
+            selectedDate = null;
+
+            renderCalendar();
+
+            return;
+        }
+
+        // Save date
+        bookedDates.push(dateString);
+
+        localStorage.setItem(
+            "cannaBookedDates",
+            JSON.stringify(bookedDates)
+        );
+
+        // Format date
+        const formattedDate =
+            selectedDate.toLocaleDateString(
+                "en-US",
+                {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            );
+
+        // Format time
+        const timeParts = time.split(":");
+
+        let hour = parseInt(timeParts[0]);
+        const minute = timeParts[1];
+
+        const ampm = hour >= 12 ? "PM" : "AM";
+
+        hour = hour % 12;
+
+        if (hour === 0) {
+            hour = 12;
+        }
+
+        const formattedTime =
+            `${hour}:${minute} ${ampm}`;
+
+        // Put information in confirmation
+        document.getElementById("confirmActivity").textContent =
+            `${activity.value} 💕`;
+
+        document.getElementById("confirmDate").textContent =
+            formattedDate;
+
+        document.getElementById("confirmTime").textContent =
+            formattedTime;
+
+        // Show confirmation
+        document.getElementById(
+            "confirmation"
+        ).classList.add("show");
+
+        // Scroll to confirmation
+        document.getElementById(
+            "confirmation"
+        ).scrollIntoView({
+            behavior: "smooth"
+        });
+
+        // Refresh calendar so date becomes blocked
+        renderCalendar();
+    }
+
+
+    // ============================
+    // RESET BOOKING FORM
+    // ============================
+
+    function resetBooking() {
+
+        selectedDate = null;
+
+        document.querySelectorAll(
+            'input[name="hangout"]'
+        ).forEach(function (input) {
+
+            input.checked = false;
+
+        });
+
+        document.getElementById("time").value = "";
+
+        document.getElementById(
+            "selectedDate"
+        ).textContent = "No date selected yet ♡";
+
+        document.getElementById(
+            "confirmation"
+        ).classList.remove("show");
+
+        renderCalendar();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    // ============================
+    // START CALENDAR
+    // ============================
+
+    renderCalendar();
+
+</script>
+
+</body>
+</html>
